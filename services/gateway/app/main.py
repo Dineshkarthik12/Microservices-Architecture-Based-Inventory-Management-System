@@ -2,10 +2,19 @@ from jose import JWTError, jwt
 import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
+from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 
 app = FastAPI(title="API Gateway", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SERVICE_MAP = {
     "auth": settings.auth_service_url,

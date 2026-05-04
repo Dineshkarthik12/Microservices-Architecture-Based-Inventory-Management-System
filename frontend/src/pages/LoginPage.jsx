@@ -18,7 +18,13 @@ export default function LoginPage() {
       saveAuth(res.data.access_token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.detail || "Login failed");
+      let errorMsg = "Login failed";
+      if (err.response?.data?.detail) {
+        errorMsg = Array.isArray(err.response.data.detail) 
+          ? err.response.data.detail[0].msg 
+          : err.response.data.detail;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
