@@ -1,0 +1,97 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ims-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./infra/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build: ./services/auth-service
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${AUTH_DB}
+      SERVICE_NAME: auth-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+
+  inventory-service:
+    build: ./services/inventory-service
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${INVENTORY_DB}
+      SERVICE_NAME: inventory-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8002:8000"
+
+  order-service:
+    build: ./services/order-service
+    env_file: .env
+    environment:
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${ORDER_DB}
+      INVENTORY_SERVICE_URL: http://inventory-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      SERVICE_NAME: order-service
+    depends_on:
+      mysql:
+        condition: service_healthy
+      inventory-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    ports:
+      - "8003:8000"
+
+  notification-service:
+    build: ./services/notification-service
+    env_file: .env
+    environment:
+      SERVICE_NAME: notification-service
+    ports:
+      - "8004:8000"
+
+  gateway:
+    build: ./services/gateway
+    env_file: .env
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8000
+      INVENTORY_SERVICE_URL: http://inventory-service:8000
+      ORDER_SERVICE_URL: http://order-service:8000
+      NOTIFICATION_SERVICE_URL: http://notification-service:8000
+      SERVICE_NAME: gateway
+    depends_on:
+      - auth-service
+      - inventory-service
+      - order-service
+      - notification-service
+    ports:
+      - "${GATEWAY_PORT}:8000"
+
+  frontend:
+    build: ./frontend
+    env_file: .env
+    environment:
+      VITE_API_BASE_URL: http://localhost:${GATEWAY_PORT}
+    depends_on:
+      - gateway
+    ports:
+      - "${FRONTEND_PORT}:3000"
+
+volumes:
+  mysql_data:
