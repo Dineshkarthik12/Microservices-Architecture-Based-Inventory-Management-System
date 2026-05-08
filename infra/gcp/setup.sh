@@ -6,9 +6,9 @@
 # =============================================================================
 set -euo pipefail
 
-PROJECT_ID="${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
+PROJECT_ID="${GCP_PROJECT_ID:-microinventory}"
 REGION="${GCP_REGION:-us-central1}"
-GITHUB_REPO="${GITHUB_REPO:?Set GITHUB_REPO (e.g. username/repo-name)}"
+GITHUB_REPO="${GITHUB_REPO:-Dineshkarthik12/Microservices-Architecture-Based-Inventory-Management-System}"
 
 SA_NAME="ims-deployer"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
