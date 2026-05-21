@@ -20,7 +20,7 @@ services:
     build: ./services/auth-service
     env_file: .env
     environment:
-      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${AUTH_DB}
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${AUTH_DB}
       SERVICE_NAME: auth-service
     depends_on:
       mysql:
@@ -32,7 +32,7 @@ services:
     build: ./services/inventory-service
     env_file: .env
     environment:
-      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${INVENTORY_DB}
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${INVENTORY_DB}
       SERVICE_NAME: inventory-service
     depends_on:
       mysql:
@@ -44,7 +44,7 @@ services:
     build: ./services/order-service
     env_file: .env
     environment:
-      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${ORDER_DB}
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${ORDER_DB}
       INVENTORY_SERVICE_URL: http://inventory-service:8000
       NOTIFICATION_SERVICE_URL: http://notification-service:8000
       SERVICE_NAME: order-service
@@ -68,13 +68,6 @@ services:
 
   gateway:
     build: ./services/gateway
-    env_file: .env
-    environment:
-      AUTH_SERVICE_URL: http://auth-service:8000
-      INVENTORY_SERVICE_URL: http://inventory-service:8000
-      ORDER_SERVICE_URL: http://order-service:8000
-      NOTIFICATION_SERVICE_URL: http://notification-service:8000
-      SERVICE_NAME: gateway
     depends_on:
       - auth-service
       - inventory-service
@@ -91,7 +84,7 @@ services:
     depends_on:
       - gateway
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "${FRONTEND_PORT}:80"
 
 volumes:
   mysql_data:
