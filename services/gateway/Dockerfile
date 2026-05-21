@@ -1,10 +1,12 @@
-FROM python:3.11-slim
-WORKDIR /app
+FROM nginx:1.27-alpine
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Remove default config
+RUN rm /etc/nginx/conf.d/default.conf
 
-COPY . .
+# Copy our configs
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY proxy_params.conf /etc/nginx/proxy_params.conf
+
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["nginx", "-g", "daemon off;"]

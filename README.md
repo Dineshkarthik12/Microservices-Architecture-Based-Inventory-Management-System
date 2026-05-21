@@ -1,6 +1,6 @@
 # Inventory & Order Management (Microservices)
 
-Production-style microservices system with FastAPI, MySQL, JWT auth, and React frontend.
+Production-style microservices system with Express.js (Node.js), MySQL, JWT auth, and React frontend.
 
 ## Services
 
@@ -23,7 +23,7 @@ docker-compose up --build
 
 Access the application:
 - **Frontend UI:** `http://localhost:3000`
-- **Gateway (Swagger Docs):** `http://localhost:8000/docs`
+- **Gateway API:** `http://localhost:8000`
 
 To stop the application:
 ```bash
@@ -35,12 +35,12 @@ docker-compose down
 If you prefer to run the components individually for development:
 
 **Backend Services:**
-Navigate into each service directory, install dependencies, and run using `uvicorn`:
+Navigate into each service directory, install dependencies, and run using `node`:
 
 ```bash
 cd services/<service-name>
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port <service-port>
+npm install
+node index.js
 ```
 *(Service Ports: Gateway: 8000, Auth: 8001, Inventory: 8002, Order: 8003, Notification: 8004)*
 
@@ -62,20 +62,7 @@ show tables;
 
 ## Architecture notes
 
-- Each domain service uses its own MySQL schema.
-- Services communicate via async REST (`httpx`).
+- Each domain service uses its own MySQL schema (managed automatically by Sequelize sync).
+- Services communicate via async REST (`axios`).
 - JWT claims contain `userId` and `role`.
 - Gateway validates JWT for protected routes and forwards user context headers.
-
-## Migrations
-
-Each data service contains Alembic config:
-
-- `auth-service/alembic`
-- `inventory-service/alembic`
-- `order-service/alembic`
-
-Run migrations in each container if needed:
-
-- `alembic upgrade head`
-

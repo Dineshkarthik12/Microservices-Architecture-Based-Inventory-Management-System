@@ -103,8 +103,8 @@ echo "  -> Connection name: ${SQL_CONNECTION_NAME}"
 
 # Build the DATABASE_URL for each service using Cloud SQL Proxy socket
 # Cloud Run's built-in Cloud SQL connector uses Unix sockets
-DB_URL_PREFIX="mysql+pymysql://root:${SQL_ROOT_PASSWORD}@"
-DB_URL_SUFFIX="?unix_socket=/cloudsql/${SQL_CONNECTION_NAME}"
+DB_URL_PREFIX="mysql://root:${SQL_ROOT_PASSWORD}@localhost"
+DB_URL_SUFFIX="?socketPath=/cloudsql/${SQL_CONNECTION_NAME}"
 
 AUTH_DATABASE_URL="${DB_URL_PREFIX}/auth_db${DB_URL_SUFFIX}"
 INVENTORY_DATABASE_URL="${DB_URL_PREFIX}/inventory_db${DB_URL_SUFFIX}"
